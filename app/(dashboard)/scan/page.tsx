@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Scan, X, Zap, User, ArrowRight, Loader2, CheckCircle, Camera, QrCode } from "lucide-react";
+import { useState } from "react";
+import { X, Zap, User, ArrowRight, Loader2, CheckCircle, Camera, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import Link from "next/link";
 
 export default function ScanPage() {
   const [scanState, setScanState] = useState<"idle" | "scanning" | "found" | "paying" | "success">("idle");
-  const [scannedUser, setScannedUser] = useState<any>(null);
+  interface BasicUser { name: string; email: string }
+  const [scannedUser, setScannedUser] = useState<BasicUser | null>(null);
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [manualEmail, setManualEmail] = useState("");
@@ -28,14 +29,14 @@ export default function ScanPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const users = await apiClient.get(`/user/search?query=${manualEmail}`);
+      const users = await apiClient.get(`/user/search?query=${manualEmail}`) as BasicUser[];
       if (users.length > 0) {
         setScannedUser(users[0]);
         setScanState("found");
       } else {
         alert("No user found with this identifier");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       alert("Search failed");
     } finally {
       setIsLoading(false);
@@ -46,12 +47,13 @@ export default function ScanPage() {
     setIsLoading(true);
     try {
       await apiClient.post("/transaction/send", {
-        recipientEmail: scannedUser.email,
+        recipientEmail: scannedUser?.email ?? "",
         amount: parseFloat(amount)
       });
       setScanState("success");
-    } catch (error: any) {
-      alert(error.message || "Payment failed");
+    } catch (error: unknown) {
+      const msg = (error as Error)?.message || "Payment failed";
+      alert(msg);
     } finally {
       setIsLoading(false);
     }
@@ -60,13 +62,13 @@ export default function ScanPage() {
   if (scanState === "success") {
     return (
       <div className="max-w-md mx-auto animate-scale-in py-10">
-        <Card className="glass-card border-teal-500/20 bg-teal-500/5">
+        <Card className="glass-card premium-card border-amber-500/20 bg-amber-500/5">
           <CardContent className="pt-12 pb-10 px-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-teal-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-teal-500/40">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-amber-500/40">
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-3xl font-black text-white mb-2">Payment Sent!</h2>
-            <p className="text-slate-400 mb-8">₹{parseFloat(amount).toFixed(2)} transfer to {scannedUser.name} successful.</p>
+            <p className="text-stone-400 mb-8">₹{parseFloat(amount || "0").toFixed(2)} transfer to {scannedUser?.name || 'user'} successful.</p>
             <Button asChild className="w-full h-14 bg-white text-slate-950 font-black uppercase tracking-widest text-[10px] rounded-2xl">
               <Link href="/dashboard">Back to Dashboard</Link>
             </Button>
@@ -144,28 +146,28 @@ export default function ScanPage() {
           {scanState === "found" && (
             <div className="space-y-8 p-10 w-full max-w-sm animate-scale-in">
               <div className="flex flex-col items-center gap-6">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-teal-500/20">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/20">
                   <User className="w-10 h-10 text-white" />
                 </div>
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-white">{scannedUser.name}</h3>
-                  <p className="text-slate-500 font-medium">{scannedUser.email}</p>
-                  <Badge className="mt-2 bg-teal-500/10 text-teal-400 border-none px-3 font-bold text-[8px] tracking-widest uppercase">Verified Identity</Badge>
+                  <h3 className="text-2xl font-bold text-white">{scannedUser?.name || 'User'}</h3>
+                  <p className="text-stone-500 font-medium">{scannedUser?.email || ''}</p>
+                  <Badge className="mt-2 bg-amber-500/10 text-amber-400 border-none px-3 font-bold text-[8px] tracking-widest uppercase">Verified Identity</Badge>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Payment Amount (₹)</label>
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-widest ml-1">Payment Amount (₹)</label>
                   <Input
                     type="number"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className="h-16 text-2xl font-black bg-white/5 border-white/10 text-white rounded-2xl px-6 focus:border-teal-500 transition-all"
+                    className="h-16 text-2xl font-black bg-stone-800/50 border-white/5 text-white rounded-2xl px-6 focus:border-amber-500 transition-all"
                   />
                 </div>
-                <Button onClick={handlePayment} disabled={!amount || isLoading} className="w-full h-16 bg-teal-500 hover:bg-teal-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-teal-500/20 transition-all active:scale-[0.98]">
+                <Button onClick={handlePayment} disabled={!amount || isLoading} className="w-full h-16 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-amber-500/20 transition-all active:scale-[0.98]">
                   {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                     <div className="flex items-center gap-2">
                       <span>Pay ₹{parseFloat(amount || "0").toFixed(2)}</span>

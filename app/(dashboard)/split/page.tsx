@@ -136,7 +136,16 @@ export default function SplitPage() {
   );
 }
 
-function ActiveSplit({ title, amount, members, yourShare, status, completed }: any) {
+interface ActiveSplitProps {
+  title: string;
+  amount: string;
+  members: any[];
+  yourShare: string;
+  status: string;
+  completed?: boolean;
+}
+
+function ActiveSplit({ title, amount, members, yourShare, status, completed }: ActiveSplitProps) {
   return (
     <div className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-6">
       <div className="flex items-center gap-6">
@@ -173,6 +182,6 @@ function ActiveSplit({ title, amount, members, yourShare, status, completed }: a
   );
 }
 
-function cn(...classes: any[]) {
+function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }

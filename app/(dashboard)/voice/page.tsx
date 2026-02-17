@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Mic, MicOff, X, Zap, User, ArrowRight, Loader2, CheckCircle, Volume2, Sparkles, Brain } from "lucide-react";
+import { Mic, X, User, CheckCircle, Volume2, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function VoicePage() {
@@ -12,11 +12,14 @@ export default function VoicePage() {
   const [transcript, setTranscript] = useState("");
   const [state, setState] = useState<"idle" | "listening" | "processing" | "confirming" | "success">("idle");
   const [aiResponse, setAiResponse] = useState("");
+  const [barHeights, setBarHeights] = useState<number[]>([]);
 
   const startListening = () => {
     setIsListening(true);
     setState("listening");
     setTranscript("");
+    // generate bar heights once when starting to listen
+    setBarHeights(Array.from({ length: 10 }, () => 20 + Math.floor(Math.random() * 60)));
 
     // Simulate speech to text
     setTimeout(() => {
@@ -61,7 +64,7 @@ export default function VoicePage() {
             </div>
             <div className="space-y-4">
               <h3 className="text-2xl font-bold text-white">Tap to Speak</h3>
-              <p className="text-slate-500 font-medium max-w-xs mx-auto text-sm">"Send ₹500 to Varun Sharma for lunch" or "Check my balance"</p>
+              <p className="text-slate-500 font-medium max-w-xs mx-auto text-sm">&ldquo;Send ₹500 to Varun Sharma for lunch&rdquo; or &ldquo;Check my balance&rdquo;</p>
             </div>
             <div className="flex flex-wrap justify-center gap-2">
               <Badge variant="outline" className="border-white/10 text-slate-500 text-[8px] font-black uppercase tracking-widest px-3 py-1">Pay Bills</Badge>
@@ -74,12 +77,12 @@ export default function VoicePage() {
         {state === "listening" && (
           <div className="text-center space-y-12">
             <div className="flex items-center justify-center gap-1 h-20">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+              {barHeights.map((h, i) => (
                 <div
                   key={i}
                   className="w-1.5 bg-purple-500 rounded-full animate-voice-bar"
                   style={{
-                    height: `${20 + Math.random() * 60}%`,
+                    height: `${h}%`,
                     animationDelay: `${i * 0.1}s`
                   }}
                 />
@@ -87,7 +90,7 @@ export default function VoicePage() {
             </div>
             <div className="space-y-4">
               <p className="text-purple-400 font-black uppercase tracking-[0.3em] text-[10px] animate-pulse">Awaiting Command...</p>
-              <h2 className="text-xl font-bold text-slate-300 italic">"Go ahead, I'm listening..."</h2>
+              <h2 className="text-xl font-bold text-slate-300 italic">&ldquo;Go ahead, I&apos;m listening...&rdquo;</h2>
             </div>
             <Button variant="ghost" className="text-slate-500 hover:text-white" onClick={() => setState("idle")}>
               <X className="w-4 h-4 mr-2" /> Stop Listening
@@ -103,7 +106,7 @@ export default function VoicePage() {
                   <User className="w-5 h-5 text-slate-400" />
                 </div>
                 <div className="bg-white/5 rounded-[1.5rem] rounded-tl-none p-5 flex-1">
-                  <p className="text-sm font-medium text-white">"{transcript}"</p>
+                  <p className="text-sm font-medium text-white">&ldquo;{transcript}&rdquo;</p>
                 </div>
               </div>
 
@@ -178,6 +181,6 @@ export default function VoicePage() {
   );
 }
 
-function cn(...classes: any[]) {
+function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }

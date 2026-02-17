@@ -164,7 +164,13 @@ export default function RewardsPage({ defaultTab = "rewards" }: { defaultTab?: "
   );
 }
 
-function OfferCard({ icon, title, description, cost }: any) {
+interface OfferCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  cost: string;
+}
+function OfferCard({ icon, title, description, cost }: OfferCardProps) {
   return (
     <Card className="glass-card border-white/5 rounded-[2rem] p-8 flex flex-col justify-between group hover:bg-white/5 transition-all">
       <div className="space-y-6">
@@ -184,7 +190,16 @@ function OfferCard({ icon, title, description, cost }: any) {
   );
 }
 
-function AchievementCard({ icon, title, description, completed, date, progress, goal }: any) {
+interface AchievementCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  completed?: boolean;
+  date?: string;
+  progress?: number;
+  goal?: string;
+}
+function AchievementCard({ icon, title, description, completed, date, progress, goal }: AchievementCardProps) {
   return (
     <Card className={cn(
       "glass-card border-white/5 rounded-[2.5rem] p-8 flex flex-col items-center text-center space-y-6 relative overflow-hidden",
@@ -219,7 +234,7 @@ function AchievementCard({ icon, title, description, completed, date, progress, 
   );
 }
 
-function cn(...classes: any[]) {
+function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }
 

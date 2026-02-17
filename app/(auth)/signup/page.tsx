@@ -56,9 +56,9 @@ export default function SignupPage() {
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-teal-500/20">
               <CheckCircle className="w-12 h-12 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4">You're all set!</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">You&apos;re all set!</h2>
             <p className="text-slate-400 mb-10 leading-relaxed">
-              Welcome to the future of finance. Your FluxPay account is ready. Let's start moving money at the speed of light.
+              Welcome to the future of finance. Your FluxPay account is ready. Let&apos;s start moving money at the speed of light.
             </p>
             <Button
               asChild

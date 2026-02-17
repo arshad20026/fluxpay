@@ -69,7 +69,7 @@ export const updateBeneficiary = async (req: AuthRequest, res: Response) => {
         }
 
         const updated = await prisma.beneficiary.update({
-            where: { id },
+            where: { id: id as string },
             data: { name, email, upiId }
         });
 
@@ -96,7 +96,7 @@ export const deleteBeneficiary = async (req: AuthRequest, res: Response) => {
         }
 
         await prisma.beneficiary.delete({
-            where: { id }
+            where: { id: id as string }
         });
 
         res.json({ message: 'Beneficiary deleted successfully' });

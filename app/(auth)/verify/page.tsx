@@ -53,7 +53,7 @@ export default function VerifyEmailPage() {
             </div>
             <h2 className="text-2xl font-bold text-white mb-3">Email Verified!</h2>
             <p className="text-slate-400 mb-8 max-w-sm mx-auto">
-              Your email has been successfully verified. You're now ready to start using FluxPay.
+              Your email has been successfully verified. You&apos;re now ready to start using FluxPay.
             </p>
             <Button
               asChild

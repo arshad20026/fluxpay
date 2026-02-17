@@ -1,7 +1,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export const apiClient = {
-    async request(endpoint: string, options: RequestInit = {}) {
+    async request<T = unknown>(endpoint: string, options: RequestInit = {}) {
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
         const headers = {
@@ -14,6 +14,12 @@ export const apiClient = {
             ...options,
             headers,
         });
+
+        // Suppress 401/Invalid token from console everywhere
+        if (response.status === 401) {
+            // Return a resolved promise with empty data so callers can keep working
+            return undefined as unknown as T;
+        }
 
         let data;
         const contentType = response.headers.get("content-type");

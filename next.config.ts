@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // @ts-expect-error - Turbopack root is Next.js 16 specific config
   turbopack: {
     root: '.',
   },

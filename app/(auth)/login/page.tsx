@@ -120,9 +120,9 @@ export default function LoginPage() {
       </div>
 
       <Card className="glass-card border-white/10 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] w-full relative">
-        <div className="absolute top-4 right-6">
-          <Badge variant="outline" className="text-[10px] border-teal-500/20 text-teal-400 bg-teal-500/5 font-black tracking-widest px-2 group">
-            <div className="w-1.5 h-1.5 rounded-full bg-teal-400 mr-1.5 animate-pulse" />
+          <div className="absolute top-4 right-6">
+          <Badge variant="outline" className="text-[10px] border-amber-500/20 text-amber-400 bg-amber-500/5 font-bold tracking-widest px-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse" />
             SECURE
           </Badge>
         </div>

@@ -19,6 +19,7 @@ import {
   Gift,
   Mic,
   TrendingUp,
+  Hexagon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -38,23 +39,17 @@ const navigation = [
 ];
 
 const premiumNavigation = [
-  { name: "Security Center", href: "/security", icon: Settings, badge: "AI" },
-  { name: "AI Insights", href: "/ai-insights", icon: TrendingUp, badge: "NEW" },
-  { name: "Crypto Wallet", href: "/crypto", icon: Wallet, badge: "HOT" },
-  { name: "Market News", href: "/market-news", icon: TrendingUp, badge: "LIVE" },
-  { name: "Achievements", href: "/achievements", icon: Gift, badge: "NEW" },
+  { name: "Security Center", href: "/security", icon: Settings },
+  { name: "AI Insights", href: "/ai-insights", icon: TrendingUp },
+  { name: "Crypto Wallet", href: "/crypto", icon: Wallet },
+  { name: "Market News", href: "/market-news", icon: TrendingUp },
 ];
 
 const secondaryNavigation = [
   { name: "Profile", href: "/profile", icon: User },
 ];
 
-interface SidebarProps {
-  mobile?: boolean;
-  onClose?: () => void;
-}
-
-export function Sidebar({ mobile, onClose }: SidebarProps) {
+export function Sidebar({ mobile, onClose }: { mobile?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
 
   interface UserData {
@@ -82,7 +77,8 @@ export function Sidebar({ mobile, onClose }: SidebarProps) {
     window.location.href = "/login";
   };
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined) => {
+    if (!name) return "??";
     return name
       ?.split(" ")
       .map((n) => n[0])
@@ -92,17 +88,18 @@ export function Sidebar({ mobile, onClose }: SidebarProps) {
 
   return (
     <div className="flex flex-col h-full glass-sidebar">
-      {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-6">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
-          <Wallet className="w-5 h-5 text-white" />
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20 animate-glow">
+          <Hexagon className="w-5 h-5 text-white fill-white/20" />
         </div>
-        <span className="text-xl font-bold text-white tracking-tight">FluxPay</span>
+        <div>
+          <span className="text-lg font-bold text-white tracking-tight">FluxPay</span>
+          <p className="text-[8px] text-amber-500/60 font-medium tracking-widest uppercase">Digital Wallet</p>
+        </div>
       </div>
 
       <Separator className="bg-white/5 mx-6" />
 
-      {/* Main Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
@@ -114,21 +111,21 @@ export function Sidebar({ mobile, onClose }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group relative",
                 isActive
-                  ? "bg-teal-500/10 text-teal-400"
-                  : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                  ? "bg-gradient-to-r from-amber-500/10 to-transparent text-amber-400"
+                  : "text-stone-400 hover:bg-white/5 hover:text-stone-200"
               )}
             >
               {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-teal-500 rounded-r-full shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-amber-500 rounded-r-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
               )}
-              <item.icon className={cn("w-5 h-5 transition-colors", isActive ? "text-teal-400" : "text-slate-500 group-hover:text-slate-300")} />
+              <item.icon className={cn("w-5 h-5 transition-colors", isActive ? "text-amber-400" : "text-stone-500 group-hover:text-stone-300")} />
               <span className={isActive ? "font-semibold" : ""}>{item.name}</span>
             </Link>
           );
         })}
 
         <div className="mt-8 mb-2 px-4">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Premium</p>
+          <p className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">Premium</p>
         </div>
 
         {premiumNavigation.map((item) => {
@@ -141,35 +138,25 @@ export function Sidebar({ mobile, onClose }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden group",
                 isActive
-                  ? "bg-gradient-to-r from-purple-500/10 to-teal-500/10 text-teal-400 border border-teal-500/20"
-                  : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                  ? "bg-gradient-to-r from-purple-500/10 to-amber-500/10 text-amber-400 border border-amber-500/20"
+                  : "text-stone-400 hover:bg-white/5 hover:text-stone-200"
               )}
             >
-              <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive && "text-teal-400")} />
+              <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive && "text-amber-400")} />
               <span className="relative z-10">{item.name}</span>
-              {item.badge && (
-                <span className={cn(
-                  "ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm",
-                  item.badge === "AI" && "bg-purple-500/20 text-purple-400 border border-purple-500/20",
-                  item.badge === "NEW" && "bg-teal-500/20 text-teal-400 border border-teal-500/20",
-                  item.badge === "HOT" && "bg-orange-500/20 text-orange-400 border border-orange-500/20",
-                  item.badge === "LIVE" && "bg-green-500/20 text-green-400 border border-green-500/20"
-                )}>
-                  {item.badge}
-                </span>
-              )}
+              <div className="ml-auto w-2 h-2 rounded-full bg-amber-500/50 animate-pulse" />
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 bg-slate-900/50 backdrop-blur-sm mt-auto border-t border-white/5">
+      <div className="p-4 bg-stone-900/50 backdrop-blur-sm mt-auto border-t border-white/5">
         {secondaryNavigation.map((item) => (
           <Link
             key={item.name}
             href={item.href}
             onClick={mobile ? onClose : undefined}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all duration-200"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-stone-400 hover:bg-white/5 hover:text-stone-200 transition-all duration-200"
           >
             <item.icon className="w-5 h-5" />
             {item.name}
@@ -178,30 +165,31 @@ export function Sidebar({ mobile, onClose }: SidebarProps) {
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 justify-start mt-1"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-stone-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 justify-start mt-1"
         >
           <LogOut className="w-5 h-5" />
           Logout
         </Button>
       </div>
 
-      {/* User Preview */}
       <div className="p-4 pt-0">
         <Link
           href="/profile"
           onClick={mobile ? onClose : undefined}
-          className="bg-white/5 rounded-xl p-3 border border-white/5 backdrop-blur-md flex items-center gap-3 hover:bg-white/10 transition-colors cursor-pointer group"
+          className="bg-stone-800/50 rounded-xl p-3 border border-white/5 backdrop-blur-md flex items-center gap-3 hover:bg-stone-800 transition-colors cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
             <span className="text-sm font-bold text-white uppercase">
               {getInitials(userData?.name)}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-white truncate">{userData?.name || "User"}</p>
-            <p className="text-xs text-slate-400 truncate">Premium Member</p>
+            <p className="text-xs text-stone-500 truncate">
+              {userData?.balance !== undefined ? `₹${userData.balance.toLocaleString('en-IN')}` : "Premium"}
+            </p>
           </div>
-          <Settings className="w-4 h-4 text-slate-500 group-hover:rotate-90 transition-transform duration-500" />
+          <Settings className="w-4 h-4 text-stone-500 group-hover:rotate-90 transition-transform duration-500" />
         </Link>
       </div>
     </div>

@@ -119,7 +119,7 @@ export default function AIInsightsPage() {
                                 </div>
                                 <Progress value={financialHealthScore} className="h-3" />
                                 <p className="text-sm text-slate-300">
-                                    <span className="text-teal-400 font-semibold">Good!</span> You're managing your finances well. Keep it up!
+                                    <span className="text-teal-400 font-semibold">Good!</span> You&apos;re managing your finances well. Keep it up!
                                 </p>
                             </div>
                         </div>

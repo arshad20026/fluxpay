@@ -30,7 +30,7 @@ interface AppError {
     message?: string;
 }
 
-app.use((err: AppError, req: Request, res: Response, next: () => void) => {
+app.use((err: AppError, _req: Request, res: Response, _next: () => void) => {
     console.error('SERVER ERROR:', err);
     res.status(err.status || 500).json({
         message: err.message || 'An internal server error occurred',

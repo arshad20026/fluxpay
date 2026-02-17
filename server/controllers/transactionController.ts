@@ -91,3 +91,57 @@ export const getHistory = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+const mockRecurring = [
+    { id: '1', name: 'Netflix', amount: 499, frequency: 'monthly', nextDate: '2026-03-01', status: 'active' },
+    { id: '2', name: 'Spotify', amount: 199, frequency: 'monthly', nextDate: '2026-03-05', status: 'active' },
+    { id: '3', name: 'Electricity', amount: 1500, frequency: 'monthly', nextDate: '2026-03-15', status: 'active' },
+];
+
+export const getRecurring = async (req: Request, res: Response) => {
+    res.json(mockRecurring);
+};
+
+export const createRecurring = async (req: Request, res: Response) => {
+    const { name, amount, frequency, recipientEmail } = req.body;
+    const newRecurring = {
+        id: String(mockRecurring.length + 1),
+        name,
+        amount,
+        frequency,
+        nextDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: 'active'
+    };
+    mockRecurring.push(newRecurring);
+    res.json(newRecurring);
+};
+
+const mockSplits = [
+    { id: '1', groupName: 'Office Lunch', totalAmount: 2500, date: '2026-02-15', participants: 5, myShare: 500, status: 'settled' },
+    { id: '2', groupName: 'Weekend Trip', totalAmount: 15000, date: '2026-02-10', participants: 4, myShare: 3750, status: 'pending' },
+    { id: '3', groupName: 'Grocery', totalAmount: 1200, date: '2026-02-08', participants: 3, myShare: 400, status: 'settled' },
+];
+
+export const splitBill = async (req: Request, res: Response) => {
+    const { groupName, totalAmount, participants, participantEmails } = req.body;
+    const newSplit = {
+        id: String(mockSplits.length + 1),
+        groupName,
+        totalAmount,
+        date: new Date().toISOString().split('T')[0],
+        participants: participants || 2,
+        myShare: totalAmount / (participants || 2),
+        status: 'pending'
+    };
+    mockSplits.push(newSplit);
+    res.json(newSplit);
+};
+
+export const getSplits = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (id) {
+        const split = mockSplits.find(s => s.id === id);
+        return res.json(split || null);
+    }
+    res.json(mockSplits);
+};

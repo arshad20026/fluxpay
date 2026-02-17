@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
+import { wsManager } from '../websocket.js';
 
 interface AuthUser {
     id: string;
@@ -20,29 +21,24 @@ export const sendMoney = async (req: Request, res: Response) => {
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            // 1. Check sender balance
             const sender = await tx.user.findUnique({ where: { id: senderId } });
             if (!sender) throw new Error('Sender not found');
             if (Number(sender.balance) < amount) throw new Error('Insufficient balance');
 
-            // 2. Check recipient exists
             const recipient = await tx.user.findUnique({ where: { email: recipientEmail } });
             if (!recipient) throw new Error('Recipient not found');
             if (recipient.id === senderId) throw new Error('Cannot send money to self');
 
-            // 3. Deduct from sender
             await tx.user.update({
                 where: { id: senderId },
                 data: { balance: { decrement: amount } },
             });
 
-            // 4. Add to recipient
             await tx.user.update({
                 where: { id: recipient.id },
                 data: { balance: { increment: amount } },
             });
 
-            // 5. Record transaction
             const transaction = await tx.transaction.create({
                 data: {
                     senderId,
@@ -52,10 +48,30 @@ export const sendMoney = async (req: Request, res: Response) => {
                 },
             });
 
-            return transaction;
+            return { transaction, sender, recipient };
         });
 
-        res.json({ message: 'Transaction successful', transaction: result });
+        const transactionData = {
+            id: result.transaction.id,
+            amount: result.transaction.amount,
+            type: 'sent',
+            otherParty: result.recipient.name,
+            timestamp: result.transaction.createdAt,
+        };
+
+        wsManager.notifyTransaction(senderId, transactionData);
+        wsManager.notifyTransaction(result.recipient.id, {
+            ...transactionData,
+            type: 'received',
+            otherParty: result.sender.name,
+        });
+
+        const senderBalance = Number(result.sender.balance) - Number(amount);
+        const recipientBalance = Number(result.recipient.balance) + Number(amount);
+        wsManager.notifyBalanceUpdate(senderId, senderBalance);
+        wsManager.notifyBalanceUpdate(result.recipient.id, recipientBalance);
+
+        res.json({ message: 'Transaction successful', transaction: result.transaction });
     } catch (error: unknown) {
         if (error instanceof Error) {
             return res.status(400).json({ message: error.message || 'Transaction failed' });

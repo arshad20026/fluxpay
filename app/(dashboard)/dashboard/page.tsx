@@ -22,12 +22,15 @@ import {
     PiggyBank,
     Receipt,
     ArrowUpDown,
+    Wifi,
+    WifiOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import dynamic from "next/dynamic";
 import { apiClient } from "@/lib/api-client";
+import { useWebSocket } from "@/lib/use-websocket";
 
 const SpendingChart = dynamic(() => import("@/components/spending-chart").then((mod) => mod.SpendingChart), {
     ssr: false,
@@ -48,6 +51,27 @@ export default function DashboardPage() {
     const [userData, setUserData] = useState<any>(null);
     const [realBalance, setRealBalance] = useState<number | null>(null);
     const [realTransactions, setRealTransactions] = useState<any[]>([]);
+    const [showNotification, setShowNotification] = useState(false);
+    const [lastNotification, setLastNotification] = useState<any>(null);
+    
+    const { isConnected, balance: wsBalance, notifications } = useWebSocket();
+
+    useEffect(() => {
+        if (wsBalance !== null) {
+            setRealBalance(wsBalance);
+        }
+    }, [wsBalance]);
+
+    useEffect(() => {
+        if (notifications.length > 0) {
+            const latest = notifications[0];
+            if (latest.type === 'NEW_TRANSACTION') {
+                setLastNotification(latest);
+                setShowNotification(true);
+                setTimeout(() => setShowNotification(false), 5000);
+            }
+        }
+    }, [notifications]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -136,6 +160,34 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-8 animate-fade-in pb-10">
+            {/* Real-time Notification Toast */}
+            {showNotification && lastNotification && (
+                <div className="fixed top-20 right-6 z-50 animate-slide-up">
+                    <div className="glass-card premium-card border-amber-500/30 rounded-2xl p-4 shadow-xl shadow-amber-500/20 max-w-sm">
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center">
+                                {lastNotification.payload.type === 'received' ? (
+                                    <ArrowDownLeft className="w-5 h-5 text-white" />
+                                ) : (
+                                    <ArrowUpRight className="w-5 h-5 text-white" />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-bold text-white">
+                                    {lastNotification.payload.type === 'received' ? 'Money Received!' : 'Money Sent!'}
+                                </p>
+                                <p className="text-xs text-stone-400">
+                                    {lastNotification.payload.type === 'received' ? 'You received' : 'You sent'} ₹{lastNotification.payload.amount} {lastNotification.payload.type === 'received' ? 'from' : 'to'} {lastNotification.payload.otherParty}
+                                </p>
+                            </div>
+                            <button onClick={() => setShowNotification(false)} className="text-stone-500 hover:text-white">
+                                <Sparkles className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="animate-slide-up">
                     <p className="text-amber-500/60 font-medium tracking-widest text-[10px] mb-2 uppercase">{formattedDate}</p>
@@ -145,6 +197,17 @@ export default function DashboardPage() {
                     <p className="text-stone-400 mt-2 font-medium">{userData?.name?.split(' ')[0] || 'Member'}</p>
                 </div>
                 <div className="flex items-center gap-3 animate-slide-up delay-100">
+                    {/* Connection Status */}
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${isConnected ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                        {isConnected ? (
+                            <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                            <WifiOff className="w-3.5 h-3.5 text-red-400" />
+                        )}
+                        <span className={`text-[10px] font-medium ${isConnected ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {isConnected ? 'Live' : 'Offline'}
+                        </span>
+                    </div>
                     <Button
                         variant="ghost"
                         onClick={handleRefresh}

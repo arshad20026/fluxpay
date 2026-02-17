@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
     ArrowUpRight,
@@ -46,6 +46,7 @@ const quickActions = [
 
 export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const [balanceVisible, setBalanceVisible] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [userData, setUserData] = useState<any>(null);
@@ -55,6 +56,10 @@ export default function DashboardPage() {
     const [lastNotification, setLastNotification] = useState<any>(null);
     
     const { isConnected, balance: wsBalance, notifications } = useWebSocket();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (wsBalance !== null) {

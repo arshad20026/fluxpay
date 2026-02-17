@@ -32,11 +32,17 @@ export function useWebSocket(): UseWebSocketReturn {
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const reconnectAttempts = useRef(0);
+    const isConnecting = useRef(false);
 
     const connect = useCallback(() => {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined' || isConnecting.current) return;
+        
+        if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
+            return;
+        }
 
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5000/ws';
+        isConnecting.current = true;
+        const wsUrl = 'ws://localhost:5000/ws';
         
         try {
             const ws = new WebSocket(wsUrl);
@@ -46,14 +52,21 @@ export function useWebSocket(): UseWebSocketReturn {
                 console.log('WebSocket connected');
                 setIsConnected(true);
                 reconnectAttempts.current = 0;
+                isConnecting.current = false;
 
-                const token = localStorage.getItem('token');
-                if (token) {
-                    const user = JSON.parse(localStorage.getItem('user') || '{}');
-                    ws.send(JSON.stringify({
-                        type: 'AUTH',
-                        payload: { userId: user.id }
-                    }));
+                if (typeof window !== 'undefined') {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        try {
+                            const user = JSON.parse(localStorage.getItem('user') || '{}');
+                            ws.send(JSON.stringify({
+                                type: 'AUTH',
+                                payload: { userId: user.id }
+                            }));
+                        } catch (e) {
+                            console.error('Failed to parse user data', e);
+                        }
+                    }
                 }
             };
 
@@ -81,6 +94,7 @@ export function useWebSocket(): UseWebSocketReturn {
             ws.onclose = () => {
                 console.log('WebSocket disconnected');
                 setIsConnected(false);
+                isConnecting.current = false;
 
                 if (reconnectAttempts.current < 5) {
                     const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
@@ -93,9 +107,11 @@ export function useWebSocket(): UseWebSocketReturn {
 
             ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
+                isConnecting.current = false;
             };
         } catch (error) {
             console.error('Failed to create WebSocket:', error);
+            isConnecting.current = false;
         }
     }, []);
 

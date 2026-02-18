@@ -44,16 +44,27 @@ const quickActions = [
     { icon: ArrowUpDown, label: "Swap", href: "/swap", gradient: "from-pink-500 to-rose-600", shadow: "shadow-pink-500/20" },
 ];
 
+interface TransactionAPIResponse {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    amount: string;
+    status: string;
+    createdAt: string;
+    sender: { name: string; email: string };
+    receiver: { name: string; email: string };
+}
+
 export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [balanceVisible, setBalanceVisible] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [userData, setUserData] = useState<any>(null);
+    const [userData, setUserData] = useState<{ id: string; email: string; name: string } | null>(null);
     const [realBalance, setRealBalance] = useState<number | null>(null);
-    const [realTransactions, setRealTransactions] = useState<any[]>([]);
+    const [realTransactions, setRealTransactions] = useState<Array<{ id: string; amount: number; type: string; date: string; name?: string; status?: string; recipientName?: string; category?: string }>>([]);
     const [showNotification, setShowNotification] = useState(false);
-    const [lastNotification, setLastNotification] = useState<any>(null);
+    const [lastNotification, setLastNotification] = useState<{ type: string; payload: { type: string; amount: number; otherParty: string } } | null>(null);
     
     const { isConnected, balance: wsBalance, notifications } = useWebSocket();
 
@@ -71,7 +82,7 @@ export default function DashboardPage() {
         if (notifications.length > 0) {
             const latest = notifications[0];
             if (latest.type === 'NEW_TRANSACTION') {
-                setLastNotification(latest);
+                setLastNotification(latest as { type: string; payload: { type: string; amount: number; otherParty: string } });
                 setShowNotification(true);
                 setTimeout(() => setShowNotification(false), 5000);
             }
@@ -97,7 +108,7 @@ export default function DashboardPage() {
 
                 setRealBalance(balanceRes.balance);
 
-                const transformed = historyRes.slice(0, 5).map((t: any) => {
+                const transformed = historyRes.slice(0, 5).map((t: TransactionAPIResponse) => {
                     const isSent = t.senderId === user.id;
                     const otherUser = isSent ? t.receiver : t.sender;
                     return {
@@ -112,8 +123,8 @@ export default function DashboardPage() {
                     };
                 });
                 setRealTransactions(transformed);
-            } catch (err: any) {
-                if (err?.status === 401) return;
+            } catch (err: unknown) {
+                if (err && typeof err === 'object' && 'status' in err && err.status === 401) return;
                 console.error("Failed to fetch dashboard data", err);
             }
         };
@@ -133,7 +144,7 @@ export default function DashboardPage() {
             setRealBalance(balanceRes.balance);
 
             const user = JSON.parse(localStorage.getItem("user") || "{}");
-            const transformed = historyRes.slice(0, 5).map((t: any) => {
+            const transformed = historyRes.slice(0, 5).map((t: TransactionAPIResponse) => {
                 const isSent = t.senderId === user.id;
                 const otherUser = isSent ? t.receiver : t.sender;
                 return {

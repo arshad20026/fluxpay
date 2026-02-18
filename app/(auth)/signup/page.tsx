@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { apiClient } from "@/lib/api-client";
 
@@ -41,8 +40,12 @@ export default function SignupPage() {
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
       setStep("success");
-    } catch (error: any) {
-      alert(error.message || "Registration failed");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message || "Registration failed");
+      } else {
+        alert("Registration failed");
+      }
     } finally {
       setIsLoading(false);
     }

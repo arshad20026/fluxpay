@@ -53,7 +53,7 @@ export const sendMoney = async (req: Request, res: Response) => {
 
         const transactionData = {
             id: result.transaction.id,
-            amount: result.transaction.amount,
+            amount: String(result.transaction.amount),
             type: 'sent',
             otherParty: result.recipient.name,
             timestamp: result.transaction.createdAt,

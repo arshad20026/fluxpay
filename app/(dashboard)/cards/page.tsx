@@ -194,6 +194,6 @@ function SecurityOption({ icon, title, description, enabled }: { icon: React.Rea
 }
 
 // Utility to merge classes
-function cn(...classes: any[]) {
+function cn(...classes: (string | boolean | undefined | null)[]) {
   return classes.filter(Boolean).join(' ');
 }

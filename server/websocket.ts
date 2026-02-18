@@ -8,7 +8,7 @@ interface WSClient extends WebSocket {
 
 interface WSMessage {
     type: string;
-    payload: any;
+    payload: unknown;
 }
 
 class WebSocketManager {
@@ -78,8 +78,8 @@ class WebSocketManager {
     private handleMessage(ws: WSClient, message: WSMessage) {
         switch (message.type) {
             case 'AUTH':
-                ws.userId = message.payload.userId;
-                this.clients.set(message.payload.userId, ws);
+                ws.userId = (message.payload as { userId: string }).userId;
+                this.clients.set((message.payload as { userId: string }).userId, ws);
                 this.send(ws, { type: 'AUTH_SUCCESS', payload: { userId: ws.userId } });
                 break;
             case 'PING':
@@ -111,7 +111,7 @@ class WebSocketManager {
         }
     }
 
-    notifyTransaction(userId: string, transaction: any) {
+    notifyTransaction(userId: string, transaction: { id: string; amount: string; type: string; otherParty: string; timestamp: Date }) {
         this.sendToUser(userId, {
             type: 'NEW_TRANSACTION',
             payload: transaction
@@ -125,7 +125,7 @@ class WebSocketManager {
         });
     }
 
-    notifySecurityAlert(userId: string, alert: any) {
+    notifySecurityAlert(userId: string, alert: { type: string; message: string }) {
         this.sendToUser(userId, {
             type: 'SECURITY_ALERT',
             payload: alert

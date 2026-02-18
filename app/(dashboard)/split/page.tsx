@@ -139,7 +139,7 @@ export default function SplitPage() {
 interface ActiveSplitProps {
   title: string;
   amount: string;
-  members: any[];
+  members: Array<{ name: string; email: string; paid?: boolean }>;
   yourShare: string;
   status: string;
   completed?: boolean;

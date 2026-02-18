@@ -158,6 +158,6 @@ function CryptoAsset({ name, symbol, value, holding, trend, positive }: { name: 
     );
 }
 
-function cn(...classes: any[]) {
+function cn(...classes: (string | boolean | undefined | null)[]) {
     return classes.filter(Boolean).join(' ');
 }

@@ -31,8 +31,15 @@ import {
 import { apiClient } from "@/lib/api-client";
 import Link from "next/link";
 
+interface Beneficiary {
+    id: string;
+    name: string;
+    email: string;
+    upiId: string;
+}
+
 export default function BeneficiariesPage() {
-    const [beneficiaries, setBeneficiaries] = useState<any[]>([]);
+    const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -69,8 +76,12 @@ export default function BeneficiariesPage() {
             setIsAddOpen(false);
             setFormData({ name: "", email: "", upiId: "" });
             fetchBeneficiaries();
-        } catch (error: any) {
-            alert(error.message || "Failed to add beneficiary");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                alert(error.message || "Failed to add beneficiary");
+            } else {
+                alert("Failed to add beneficiary");
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -81,8 +92,12 @@ export default function BeneficiariesPage() {
         try {
             await apiClient.request(`/beneficiary/${id}`, { method: 'DELETE' });
             fetchBeneficiaries();
-        } catch (error: any) {
-            alert(error.message || "Failed to delete beneficiary");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                alert(error.message || "Failed to delete beneficiary");
+            } else {
+                alert("Failed to delete beneficiary");
+            }
         }
     };
 
@@ -220,14 +235,14 @@ export default function BeneficiariesPage() {
     );
 }
 
-function BeneficiaryCard({ beneficiary, onDelete }: any) {
+function BeneficiaryCard({ beneficiary, onDelete }: { beneficiary: Beneficiary; onDelete: (id: string) => void }) {
     const initials = beneficiary.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 
     return (
         <Card className="glass-card border-white/5 rounded-[2rem] p-6 hover:bg-white/5 transition-all group relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                    onClick={onDelete}
+                    onClick={() => onDelete(beneficiary.id)}
                     className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
                 >
                     <Trash2 className="w-4 h-4" />

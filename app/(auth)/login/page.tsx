@@ -1,23 +1,30 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import {
   Eye, EyeOff, Wallet, ArrowRight, Loader2, Fingerprint,
   Smartphone, Shield, Lock, Mail, Key, Github, RefreshCcw,
-  ChevronLeft, CheckCircle
+  ChevronLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { apiClient } from "@/lib/api-client";
-import { cn } from "@/lib/utils";
 
 type LoginStep = "identifier" | "password" | "otp" | "mfa" | "biometric";
+
+interface LoginResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}
 
 export default function LoginPage() {
   const [step, setStep] = useState<LoginStep>("identifier");
@@ -54,20 +61,24 @@ export default function LoginPage() {
       } else {
         completeLogin(response);
       }
-    } catch (error: any) {
-      alert(error.message || "Login failed");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message || "Login failed");
+      } else {
+        alert("Login failed");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const completeLogin = (response: any) => {
+  const completeLogin = (response: LoginResponse) => {
     localStorage.setItem("token", response.token);
     localStorage.setItem("user", JSON.stringify(response.user));
     window.location.href = "/dashboard";
   };
 
-  const handleOtpChange = (index: number, value: string, refs: any, state: any, setState: any) => {
+  const handleOtpChange = (index: number, value: string, refs: React.MutableRefObject<(HTMLInputElement | null)[]>, state: string[], setState: React.Dispatch<React.SetStateAction<string[]>>) => {
     if (value.length > 1) return;
     const newState = [...state];
     newState[index] = value;
@@ -75,7 +86,7 @@ export default function LoginPage() {
     if (value && index < 5) refs.current[index + 1]?.focus();
   };
 
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent, refs: any, state: any) => {
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent, refs: React.MutableRefObject<(HTMLInputElement | null)[]>, state: string[]) => {
     if (e.key === "Backspace" && !state[index] && index > 0) {
       refs.current[index - 1]?.focus();
     }

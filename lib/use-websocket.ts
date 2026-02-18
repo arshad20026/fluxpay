@@ -12,13 +12,13 @@ type WSMessageType =
 
 interface WSMessage {
     type: WSMessageType;
-    payload: any;
+    payload: unknown;
 }
 
 interface UseWebSocketReturn {
     isConnected: boolean;
     lastMessage: WSMessage | null;
-    sendMessage: (type: string, payload?: any) => void;
+    sendMessage: (type: string, payload?: unknown) => void;
     balance: number | null;
     notifications: WSMessage[];
     clearNotifications: () => void;
@@ -33,6 +33,7 @@ export function useWebSocket(): UseWebSocketReturn {
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const reconnectAttempts = useRef(0);
     const isConnecting = useRef(false);
+    const connectRef = useRef<() => void>(() => {});
 
     const connect = useCallback(() => {
         if (typeof window === 'undefined' || isConnecting.current) return;
@@ -80,7 +81,7 @@ export function useWebSocket(): UseWebSocketReturn {
                             setNotifications(prev => [message, ...prev].slice(0, 20));
                             break;
                         case 'BALANCE_UPDATE':
-                            setBalance(message.payload.balance);
+                            setBalance((message.payload as { balance: number }).balance);
                             break;
                         case 'SECURITY_ALERT':
                             setNotifications(prev => [message, ...prev].slice(0, 20));
@@ -100,7 +101,7 @@ export function useWebSocket(): UseWebSocketReturn {
                     const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
                     reconnectTimeoutRef.current = setTimeout(() => {
                         reconnectAttempts.current++;
-                        connect();
+                        connectRef.current();
                     }, delay);
                 }
             };
@@ -116,6 +117,10 @@ export function useWebSocket(): UseWebSocketReturn {
     }, []);
 
     useEffect(() => {
+        connectRef.current = connect;
+    }, [connect]);
+
+    useEffect(() => {
         connect();
 
         return () => {
@@ -128,7 +133,7 @@ export function useWebSocket(): UseWebSocketReturn {
         };
     }, [connect]);
 
-    const sendMessage = useCallback((type: string, payload?: any) => {
+    const sendMessage = useCallback((type: string, payload?: unknown) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify({ type, payload }));
         }

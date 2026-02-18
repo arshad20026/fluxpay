@@ -237,6 +237,6 @@ function MetricCard({ title, value, trend, icon, positive }: { title: string, va
   );
 }
 
-function cn(...classes: any[]) {
+function cn(...classes: (string | boolean | undefined | null)[]) {
   return classes.filter(Boolean).join(' ');
 }

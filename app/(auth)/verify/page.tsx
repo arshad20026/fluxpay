@@ -91,7 +91,7 @@ export default function VerifyEmailPage() {
             Verify your email
           </CardTitle>
           <CardDescription className="text-slate-400">
-            We've sent a 6-digit verification code to your email
+            We&apos;ve sent a 6-digit verification code to your email
           </CardDescription>
         </CardHeader>
 
@@ -134,7 +134,7 @@ export default function VerifyEmailPage() {
 
           <div className="text-center space-y-3">
             <p className="text-slate-400 text-sm">
-              Didn't receive the code?{" "}
+              Didn&apos;t receive the code?{" "}
               <button className="font-medium text-teal-400 hover:text-teal-300 transition-colors">
                 Resend
               </button>

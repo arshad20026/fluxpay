@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -51,6 +51,15 @@ const secondaryNavigation = [
 
 export function Sidebar({ mobile, onClose }: { mobile?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   interface UserData {
     id?: string;

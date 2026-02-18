@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, Bell, Search, Hexagon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,16 @@ import { Sidebar } from "./sidebar";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   interface UserData {
     id?: string;
     name?: string;

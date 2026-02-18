@@ -72,6 +72,10 @@ export default function DashboardPage() {
         setMounted(true);
     }, []);
 
+    if (!mounted) {
+        return null;
+    }
+
     useEffect(() => {
         if (wsBalance !== null) {
             setRealBalance(wsBalance);

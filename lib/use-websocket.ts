@@ -43,7 +43,7 @@ export function useWebSocket(): UseWebSocketReturn {
         }
 
         isConnecting.current = true;
-        const wsUrl = 'ws://localhost:5000/ws';
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5000/ws';
         
         try {
             const ws = new WebSocket(wsUrl);
